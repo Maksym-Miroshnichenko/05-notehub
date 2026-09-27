@@ -1,6 +1,6 @@
 import css from './App.module.css'
 import { useState } from 'react'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, keepPreviousData } from '@tanstack/react-query'
 import { fetchNotes } from '../../services/noteService'
 import NoteList from '../NoteList/NoteList'
 import Pagination from '../Pagination/Pagination'
@@ -18,6 +18,7 @@ function App() {
   const { data } = useQuery({
     queryKey: ['notes', query, page],
     queryFn: () => fetchNotes({ query, page }),
+    placeholderData: keepPreviousData,
   });
 
   const OpenModal = () => {
@@ -38,7 +39,7 @@ function App() {
             <Pagination
               currentPage={page}
               totalPages={data?.totalPages ?? 1}
-              onPageChange={setPage}
+              onPageChange={(selectedIndex) => setPage(selectedIndex + 1)}
             />
           )}
           <button onClick={OpenModal} className={css.button}>Create note +</button>

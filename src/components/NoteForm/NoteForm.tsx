@@ -3,15 +3,28 @@ import { Formik, Form, Field, ErrorMessage } from 'formik';
 import * as Yup from 'yup';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { createNote } from '../../services/noteService';
+import type { NewNote } from '../../types/note';
 
-export default function NoteForm({onClose}: {onClose: () => void }) {
-  const initialValues = {
+interface NoteFormProps {
+  onClose: () => void;
+}
+
+export default function NoteForm({ onClose }: NoteFormProps) {
+  const queryClient = useQueryClient();
+
+  const initialValues: NewNote = {
     title: '',
     content: '',
     tag: 'Todo',
   };
-  
-  const queryClient = useQueryClient();
+
+  const validationSchema = Yup.object({
+    title: Yup.string().min(3).max(50).required('Title is required'),
+    content: Yup.string().max(500),
+    tag: Yup.string()
+      .oneOf(['Todo', 'Work', 'Personal', 'Meeting', 'Shopping'])
+      .required('Tag is required'),
+  });
 
   const mutation = useMutation({
     mutationFn: createNote,
@@ -21,22 +34,13 @@ export default function NoteForm({onClose}: {onClose: () => void }) {
     },
   });
 
-  const validationSchema = Yup.object({
-    title: Yup.string()
-      .min(3, 'Title must be at least 3 characters')
-      .max(50, 'Title must be at most 50 characters')
-      .required('Title is required'),
-    content: Yup.string()
-      .max(500, 'Content must be at most 500 characters'),
-    tag: Yup.string()
-      .oneOf(['Todo', 'Work', 'Personal', 'Meeting', 'Shopping'], 'Invalid tag')
-      .required('Tag is required'),
-  });
-
   return (
-    <Formik initialValues={initialValues} validationSchema={validationSchema} onSubmit={(values) => mutation.mutate(values)}>
+    <Formik
+      initialValues={initialValues}
+      validationSchema={validationSchema}
+      onSubmit={(values: NewNote) => mutation.mutate(values)}>
       {({ isSubmitting }) => (
-    <Form className={css.form}>
+        <Form className={css.form}>
       <div className={css.formGroup}>
         <label htmlFor="title">Title</label>
         <Field id="title" type="text" name="title" className={css.input} />
@@ -78,7 +82,8 @@ export default function NoteForm({onClose}: {onClose: () => void }) {
           Create note
         </button>
       </div>
-    </Form>)}
+     </Form>
+      )}
     </Formik>
-  )
+  );
 }

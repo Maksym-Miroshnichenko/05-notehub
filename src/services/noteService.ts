@@ -36,10 +36,12 @@ export async function fetchNotes(params: FetchParams): Promise<SearchResponse> {
   return response.data;
 }
 
-export async function createNote(note: NewNote): Promise<void> {
-  await instance.post<Note>('', note);
+export async function createNote(note: NewNote): Promise<Note> {
+  const response = await instance.post<Note>('', note);
+  return response.data;
 }
 
-export async function deleteNote(noteId: string): Promise<void> {
-  await instance.delete(`/${noteId}`);
+export async function deleteNote(noteId: string): Promise<Note> {
+  const response = await instance.delete<Note>(`/${noteId}`);
+  return response.data;
 }
